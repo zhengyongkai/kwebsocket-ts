@@ -7,9 +7,9 @@
     <title>Document</title>
   </head>
   <body>
-    <script type="module" src="./bundle.esm.js"></script>
+    <script type="module" src="./index.js"></script>
     <script type="module">
-      import KWebsocket from "./bundle.esm.js";
+      import KWebsocket from "./index.js";
 
       let message = {
         type: "onPerson",
@@ -20,13 +20,14 @@
 
       const websocket = new KWebsocket("ws://127.0.0.1:7001/chat/123",{
         _reconnect:true,
+        _autoConnect:true,
       });
 
       setTimeout(() => {
         websocket.on("onmessage", (data) => {
           console.log(data);
         });
-        websocket.doOpen();
+        // websocket.doClose()
       }, 200);
     </script>
   </body>

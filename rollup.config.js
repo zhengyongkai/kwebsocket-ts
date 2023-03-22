@@ -14,13 +14,8 @@ export default {
   ],
   output: [
     {
-      format: 'cjs',
-      file: 'lib/bundle.cjs.js',
-      sourcemap: true,
-    },
-    {
       format: 'es',
-      file: 'lib/bundle.esm.js',
+      file: 'dist/index.js',
       sourcemap: true,
     },
   ],

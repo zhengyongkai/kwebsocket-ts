@@ -1,3 +1,3 @@
-import Emiiter from "./wesocket";
+import KWebocket from "./lib";
 
-export default Emiiter
+export default KWebocket

@@ -54,7 +54,7 @@ var Emiiter = /** @class */ (function () {
         return this;
     };
     Emiiter.prototype.off = function (eventName, fn) {
-        var quene = this.quenes.get(eventName);
+        var quene = this.quenes.get(eventName) || [];
         if (!quene) {
             return this;
         }
@@ -66,10 +66,11 @@ var Emiiter = /** @class */ (function () {
         return this;
     };
     Emiiter.prototype.once = function (eventName, fn) {
-        function once() {
-            this.off(eventName, fn);
-            fn.call(this, arguments);
-        }
+        var that = this;
+        var once = function () {
+            that.off(eventName, fn);
+            fn.call(that, arguments);
+        };
         once.fn = fn;
         this.on(eventName, once);
         return this;
@@ -79,7 +80,7 @@ var Emiiter = /** @class */ (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
         }
-        var quene = this.quenes.get(eventName);
+        var quene = this.quenes.get(eventName) || [];
         if (quene) {
             for (var _a = 0, quene_1 = quene; _a < quene_1.length; _a++) {
                 var callback = quene_1[_a];
@@ -93,18 +94,18 @@ var Emiiter = /** @class */ (function () {
 
 function log(type, msg) {
     var colorList = {
-        'success': 'color:#67C23A',
-        'error': 'color:#F56C6C',
-        'warning': 'color:#409EFF'
+        success: "color:#67C23A",
+        error: "color:#F56C6C",
+        warning: "color:#409EFF",
     };
     console.log("%c " + msg, colorList[type]);
 }
 
 var STATUS = {
-    CONNECTING: "connecting",
-    OPEN: "open",
-    CLOSING: "closing",
-    CLOSED: "closed",
+    CONNECTING: 0,
+    OPEN: 1,
+    CLOSING: 2,
+    CLOSED: 3,
 };
 var KWebsocket = /** @class */ (function (_super) {
     __extends(KWebsocket, _super);
@@ -112,29 +113,42 @@ var KWebsocket = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.reconnectionCount = 0;
         _this.url = url;
-        _this.protocol = options === null || options === void 0 ? void 0 : options.protocol;
-        _this._autoConnect = options === null || options === void 0 ? void 0 : options._autoConnect;
-        _this._reconnect = options === null || options === void 0 ? void 0 : options._reconnect;
-        _this._reconnectionAttempts = options._reconnectionAttempts || Infinity;
-        _this._reconnectionDelay = options._reconnectionDelay || 500;
+        _this.protocol = (options === null || options === void 0 ? void 0 : options.protocol) || [];
+        _this._autoConnect = (options === null || options === void 0 ? void 0 : options._autoConnect) || false;
+        _this._reconnect = (options === null || options === void 0 ? void 0 : options._reconnect) || false;
+        _this._reconnectionAttempts = (options === null || options === void 0 ? void 0 : options._reconnectionAttempts) || Infinity;
+        _this._reconnectionDelay = (options === null || options === void 0 ? void 0 : options._reconnectionDelay) || 500;
+        _this._status = STATUS.CLOSED;
         _this._autoConnect && _this.doOpen();
         return _this;
     }
-    KWebsocket.prototype.doOpen = function () {
+    KWebsocket.prototype.doOpen = function (url) {
+        if (url === void 0) { url = this.url; }
         try {
-            this._status = STATUS.CONNECTING;
-            this.kwebsocket = new WebSocket(this.url, this.protocol);
-            this.addEventListeners();
+            if (this._status === STATUS.CLOSED) {
+                this._status = STATUS.CONNECTING;
+                if (typeof window === "object") {
+                    // window只存在于浏览器端
+                    this.kwebsocket = new WebSocket(url, this.protocol);
+                }
+                else if (Object.prototype.toString.call(process) === "[object process]") {
+                    // 由於 jest 是在 node 端運行，所以需要添加 node 環境的 websocket
+                    var node_websocket = require("ws");
+                    this.kwebsocket = new node_websocket(url, this.protocol);
+                }
+                this.addEventListeners();
+            }
         }
         catch (error) {
-            log("error", error);
+            log("error", JSON.stringify(error));
         }
         return this;
     };
     KWebsocket.prototype.doClose = function () {
         this._status = STATUS.CLOSING;
         this._reconnect = false;
-        this.kwebsocket = null;
+        this.kwebsocket.close();
+        this.kwebsocket = undefined;
         return this;
     };
     KWebsocket.prototype.reconnect = function () {
@@ -162,6 +176,7 @@ var KWebsocket = /** @class */ (function (_super) {
     KWebsocket.prototype.addEventListeners = function () {
         var _this = this;
         ["onopen", "onclose", "onmessage", "onerror"].forEach(function (res) {
+            // @ts-ignore: Unreachable code error
             _this.kwebsocket[res] = function (data) {
                 if (res === "onopen") {
                     _super.prototype.emit.call(_this, res);
@@ -191,4 +206,4 @@ var KWebsocket = /** @class */ (function (_super) {
 }(Emiiter));
 
 export { KWebsocket as default };
-//# sourceMappingURL=bundle.esm.js.map
+//# sourceMappingURL=index.js.map

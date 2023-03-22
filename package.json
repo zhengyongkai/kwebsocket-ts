@@ -2,20 +2,40 @@
   "name": "kwebsocket",
   "version": "1.0.0",
   "description": "a websocket of rollup",
-  "main": "index.js",
+  "main": "index.ts",
+  "type": "module",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "require": "./dist/index.js",
+        "default": "./index.js"
+      },
+      "default": {
+        "require": "./dist/index.js",
+        "default": "./index.js"
+      }
+    }
+  },
   "scripts": {
+    "server": "node server/index.cjs",
     "build": "rollup -c",
-    "test": "jest --no-cache"
+    "test": "jest --no-cache --silent"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^29.2.3",
+    "eslint": "^8.28.0",
     "jest": "^29.3.1",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-typescript": "^1.0.1",
     "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
     "tslib": "^2.4.1",
     "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
   }
 }
