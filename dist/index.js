@@ -127,20 +127,20 @@ var KWebsocket = /** @class */ (function (_super) {
         try {
             if (this._status === STATUS.CLOSED) {
                 this._status = STATUS.CONNECTING;
-                if (typeof window === "object") {
+                if (typeof window === 'object') {
                     // window只存在于浏览器端
                     this.kwebsocket = new WebSocket(url, this.protocol);
                 }
-                else if (Object.prototype.toString.call(process) === "[object process]") {
+                else if (Object.prototype.toString.call(process) === '[object process]') {
                     // 由於 jest 是在 node 端運行，所以需要添加 node 環境的 websocket
-                    var node_websocket = require("ws");
+                    var node_websocket = require('ws');
                     this.kwebsocket = new node_websocket(url, this.protocol);
                 }
                 this.addEventListeners();
             }
         }
         catch (error) {
-            log("error", JSON.stringify(error));
+            log('error', JSON.stringify(error));
         }
         return this;
     };
@@ -155,7 +155,7 @@ var KWebsocket = /** @class */ (function (_super) {
         var _this = this;
         if (this.reconnectionCount < this._reconnectionAttempts &&
             this._status === STATUS.CLOSED) {
-            log("warning", "💕 重連中");
+            log('warning', '💕 重連中');
             this.reconnectionCount++;
             window.clearInterval(this._reconnectTimeoutId);
             this._reconnectTimeoutId = window.setTimeout(function () {
@@ -175,28 +175,28 @@ var KWebsocket = /** @class */ (function (_super) {
     };
     KWebsocket.prototype.addEventListeners = function () {
         var _this = this;
-        ["onopen", "onclose", "onmessage", "onerror"].forEach(function (res) {
+        ['onopen', 'onclose', 'onmessage', 'onerror'].forEach(function (res) {
             // @ts-ignore: Unreachable code error
             _this.kwebsocket[res] = function (data) {
-                if (res === "onopen") {
+                if (res === 'onopen') {
                     _super.prototype.emit.call(_this, res);
                     _this._status = STATUS.OPEN;
-                    log("success", "🙂 連接成功");
+                    log('success', '🙂 連接成功');
                 }
-                if (res === "onmessage") {
+                if (res === 'onmessage') {
                     _super.prototype.emit.call(_this, res, data.data);
-                    log("success", "😄 成功收到訊息,訊息為 " + data.data);
+                    log('success', '😄 成功收到訊息,訊息為 ' + data.data);
                 }
-                if (res === "onclose") {
+                if (res === 'onclose') {
                     _super.prototype.emit.call(_this, res, data);
                     _this._status = STATUS.CLOSED;
-                    log("error", "連接已關閉");
+                    log('error', '連接已關閉');
                     _this._reconnect && _this.reconnect();
                 }
-                if (res === "onerror") {
+                if (res === 'onerror') {
                     _super.prototype.emit.call(_this, res, data);
                     _this._status = STATUS.CLOSING;
-                    log("error", "連接失敗,發生錯誤");
+                    log('error', '連接失敗,發生錯誤');
                 }
             };
         });

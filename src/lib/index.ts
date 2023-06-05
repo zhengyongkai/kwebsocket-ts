@@ -1,5 +1,5 @@
-import Emiiter from "./emiiter";
-import { log } from "../utils";
+import Emiiter from './emiiter';
+import { log } from '../utils';
 
 const STATUS = {
   CONNECTING: 0,
@@ -43,28 +43,28 @@ export default class KWebsocket extends Emiiter {
     try {
       if (this._status === STATUS.CLOSED) {
         this._status = STATUS.CONNECTING;
-        if (typeof window === "object") {
+        if (typeof window === 'object') {
           // window只存在于浏览器端
           this.kwebsocket = new WebSocket(url, this.protocol);
         } else if (
-          Object.prototype.toString.call(process) === "[object process]"
+          Object.prototype.toString.call(process) === '[object process]'
         ) {
           // 由於 jest 是在 node 端運行，所以需要添加 node 環境的 websocket
-          const node_websocket = require("ws");
+          const node_websocket = require('ws');
           this.kwebsocket = new node_websocket(url, this.protocol);
         }
         this.addEventListeners();
       }
     } catch (error) {
-      log("error", JSON.stringify(error));
+      log('error', JSON.stringify(error));
     }
     return this;
   }
   public doClose(): this {
     this._status = STATUS.CLOSING;
     this._reconnect = false;
-    (this.kwebsocket as WebSocket).close()
-    this.kwebsocket = undefined
+    (this.kwebsocket as WebSocket).close();
+    this.kwebsocket = undefined;
     return this;
   }
   private reconnect(): this {
@@ -72,7 +72,7 @@ export default class KWebsocket extends Emiiter {
       this.reconnectionCount < this._reconnectionAttempts &&
       this._status === STATUS.CLOSED
     ) {
-      log("warning", "💕 重連中");
+      log('warning', '💕 重連中');
       this.reconnectionCount++;
       window.clearInterval(this._reconnectTimeoutId);
       this._reconnectTimeoutId = window.setTimeout(() => {
@@ -91,28 +91,28 @@ export default class KWebsocket extends Emiiter {
     return this;
   }
   private addEventListeners(): this {
-    ["onopen", "onclose", "onmessage", "onerror"].forEach((res: string) => {
+    ['onopen', 'onclose', 'onmessage', 'onerror'].forEach((res: string) => {
       // @ts-ignore: Unreachable code error
       this.kwebsocket[res] = (data: any) => {
-        if (res === "onopen") {
+        if (res === 'onopen') {
           super.emit(res);
           this._status = STATUS.OPEN;
-          log("success", "🙂 連接成功");
+          log('success', '🙂 連接成功');
         }
-        if (res === "onmessage") {
+        if (res === 'onmessage') {
           super.emit(res, data.data);
-          log("success", "😄 成功收到訊息,訊息為 " + data.data);
+          log('success', '😄 成功收到訊息,訊息為 ' + data.data);
         }
-        if (res === "onclose") {
+        if (res === 'onclose') {
           super.emit(res, data);
           this._status = STATUS.CLOSED;
-          log("error", "連接已關閉");
+          log('error', '連接已關閉');
           this._reconnect && this.reconnect();
         }
-        if (res === "onerror") {
+        if (res === 'onerror') {
           super.emit(res, data);
           this._status = STATUS.CLOSING;
-          log("error", "連接失敗,發生錯誤");
+          log('error', '連接失敗,發生錯誤');
         }
       };
     });

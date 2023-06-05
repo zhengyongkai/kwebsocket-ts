@@ -1,6 +1,6 @@
 {
-  "name": "kwebsocket",
-  "version": "1.0.0",
+  "name": "@zhengyongkai/kwebsocket",
+  "version": "1.0.4",
   "description": "a websocket of rollup",
   "main": "index.ts",
   "type": "module",
@@ -9,11 +9,7 @@
     ".": {
       "browser": {
         "require": "./dist/index.js",
-        "default": "./index.js"
-      },
-      "default": {
-        "require": "./dist/index.js",
-        "default": "./index.js"
+        "default": "./index.ts"
       }
     }
   },
@@ -37,5 +33,9 @@
   },
   "dependencies": {
     "ws": "^8.13.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
